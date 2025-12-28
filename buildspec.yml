@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com
+
+  build:
+    commands:
+      - echo Build started...
+      - echo "Commit SHA: $CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - docker build -t my-app:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker tag my-app:$CODEBUILD_RESOLVED_SOURCE_VERSION $AWS_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/my-app:$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+  post_build:
+    commands:
+      - echo Pushing image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/my-app:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - printf '[{"name":"user","imageUri":"%s"}]' \
+        $AWS_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/my-app:$CODEBUILD_RESOLVED_SOURCE_VERSION > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
