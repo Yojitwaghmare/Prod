@@ -8,8 +8,16 @@ table = dynamodb.Table("Users")
 
 
 @app.route("/users/health", methods=["GET"])
-def health():
+def healthuser():
     return {"status": "healthy"}, 200
+
+# @app.route("/orders/health", methods=["GET"])
+# def healthorder():
+#     return {"status": "healthy"}, 200
+
+# @app.route("/inventory/health", methods=["GET"])
+# def healthinvetory():
+#     return {"status": "healthy"}, 200
 
 
 @app.route("/users", methods=["GET", "POST"])
